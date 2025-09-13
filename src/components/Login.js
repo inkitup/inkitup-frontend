@@ -20,7 +20,7 @@ const Login = () => {
     try {
       const success = await login(email, password);
       if (success) {
-        navigate("/dashboard");
+        navigate("/home");
       } else {
         setError("Failed to login. Please check your credentials.");
       }
@@ -64,16 +64,16 @@ const Login = () => {
       <div className="max-w-4xl w-full flex shadow-2xl rounded-xl overflow-hidden">
         {/* Background Image Section */}
         <div
-          className="hidden md:block md:w-1/2 bg-cover bg-center"
+          className="hidden md:block md:w-1/2 bg-contain bg-center"
           style={{
-            backgroundImage: "url('./wesee.jpg')",
+            backgroundImage: "url('./InkItUp.jpg')",
           }}
         >
           <div className="bg-black bg-opacity-50 h-full flex items-center justify-center">
             <div className="text-center text-white px-6">
               <h2 className="text-4xl font-bold mb-4">Welcome Back!</h2>
               <p className="text-xl">
-                Sign in to continue to your personalized dashboard
+                Sign in to continue to your account
               </p>
             </div>
           </div>
