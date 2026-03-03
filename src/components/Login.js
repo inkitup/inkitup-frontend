@@ -45,7 +45,7 @@ const Login = () => {
 
           const success = await handleOAuthCallback(token);
           if (success) {
-            navigate("/dashboard");
+            navigate("/home");
           } else {
             setError("OAuth authentication failed. Please try again.");
           }
@@ -72,9 +72,7 @@ const Login = () => {
           <div className="bg-black bg-opacity-50 h-full flex items-center justify-center">
             <div className="text-center text-white px-6">
               <h2 className="text-4xl font-bold mb-4">Welcome Back!</h2>
-              <p className="text-xl">
-                Sign in to continue to your account
-              </p>
+              <p className="text-xl">Sign in to continue to your account</p>
             </div>
           </div>
         </div>

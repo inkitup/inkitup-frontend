@@ -2,6 +2,8 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import axios from "axios";
 
 const AuthContext = createContext(null);
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -18,18 +20,18 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, {
         email,
         password,
       });
       localStorage.setItem("token", res.data.token);
       const guestCart = JSON.parse(localStorage.getItem("guestCart")) || [];
 
-      const userRes = await axios.get("http://localhost:5000/api/auth/user", {
+      const userRes = await axios.get(`${API_BASE_URL}/api/auth/user`, {
         headers: { Authorization: `Bearer ${res.data.token}` },
       });
 
-      const cartRes = await axios.get("http://localhost:5000/api/usercart", {
+      const cartRes = await axios.get(`${API_BASE_URL}/api/usercart`, {
         headers: { Authorization: `Bearer ${res.data.token}` },
       });
 
@@ -51,25 +53,27 @@ export const AuthProvider = ({ children }) => {
 
   const mergeCartItems = (userItems, guestItems) => {
     const mergedItems = [...userItems];
-    
-    guestItems.forEach(guestItem => {
+
+    guestItems.forEach((guestItem) => {
       // Look for matching item in user cart
-      const existingItemIndex = mergedItems.findIndex(item => 
-        item.product === guestItem.product && 
-        item.color === guestItem.color && 
-        item.designId === guestItem.designId
+      const existingItemIndex = mergedItems.findIndex(
+        (item) =>
+          item.product === guestItem.product &&
+          item.color === guestItem.color &&
+          item.designId === guestItem.designId,
       );
-      
+
       if (existingItemIndex !== -1) {
         // If item exists, update quantity
-        mergedItems[existingItemIndex].quantity = 
-          (mergedItems[existingItemIndex].quantity || 1) + (guestItem.quantity || 1);
+        mergedItems[existingItemIndex].quantity =
+          (mergedItems[existingItemIndex].quantity || 1) +
+          (guestItem.quantity || 1);
       } else {
         // Otherwise add new item
         mergedItems.push(guestItem);
       }
     });
-    
+
     return mergedItems;
   };
 
@@ -82,30 +86,30 @@ export const AuthProvider = ({ children }) => {
         if (guestCart) {
           const parsedCart = JSON.parse(guestCart);
           // Ensure all items have quantity property
-          const cartWithQuantities = parsedCart.map(item => ({
+          const cartWithQuantities = parsedCart.map((item) => ({
             ...item,
-            quantity: item.quantity || 1
+            quantity: item.quantity || 1,
           }));
           setCartItems(cartWithQuantities);
         }
         return;
       }
 
-      const userRes = await axios.get("http://localhost:5000/api/auth/user", {
+      const userRes = await axios.get(`${API_BASE_URL}/api/auth/user`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(userRes.data);
 
-      const cartRes = await axios.get("http://localhost:5000/api/usercart", {
+      const cartRes = await axios.get(`${API_BASE_URL}/api/usercart`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       // Ensure all items have quantity property
-      const cartWithQuantities = (cartRes.data.items || []).map(item => ({
+      const cartWithQuantities = (cartRes.data.items || []).map((item) => ({
         ...item,
-        quantity: item.quantity || 1
+        quantity: item.quantity || 1,
       }));
-      
+
       setCartItems(cartWithQuantities);
       setIsLoading(false);
     } catch (error) {
@@ -122,14 +126,16 @@ export const AuthProvider = ({ children }) => {
       return;
     }
     try {
-      const lightweightItems = items.map(item => ({
+      const lightweightItems = items.map((item) => ({
         ...item,
-        customizedImages: undefined 
+        customizedImages: undefined,
       }));
       await axios.post(
-        "http://localhost:5000/api/sync",
+        `${API_BASE_URL}/api/sync`,
         { items: lightweightItems },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
       );
     } catch (error) {
       console.error("Error syncing cart:", error);
@@ -137,7 +143,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateItemQuantity = async (itemId, change) => {
-    const updatedCart = cartItems.map(item => {
+    const updatedCart = cartItems.map((item) => {
       if (item.id === itemId) {
         const currentQuantity = item.quantity || 1;
         const newQuantity = Math.max(1, currentQuantity + change);
@@ -145,7 +151,7 @@ export const AuthProvider = ({ children }) => {
       }
       return item;
     });
-    
+
     setCartItems(updatedCart);
     await syncCartToBackend(updatedCart);
   };
@@ -154,26 +160,22 @@ export const AuthProvider = ({ children }) => {
     try {
       // Verify the token with the backend
       const response = await axios.get(
-        "http://localhost:5000/api/auth/verify-token",
+        `${API_BASE_URL}/api/auth/verify-token`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
-
       if (response.data.valid) {
         localStorage.setItem("token", token);
 
         // Fetch user details
-        const userResponse = await axios.get(
-          "http://localhost:5000/api/auth/user",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const userResponse = await axios.get(`${API_BASE_URL}/api/auth/user`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setUser(userResponse.data);
         return true;
       }
@@ -187,12 +189,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const googleLogin = () => {
-    window.location.href = "http://localhost:5000/api/auth/google";
+    window.location.href = `${API_BASE_URL}/api/auth/google`;
   };
 
   const signup = async (firstName, lastName, email, password) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signup", {
+      const res = await axios.post(`${API_BASE_URL}/api/auth/signup`, {
         firstName,
         lastName,
         email,
@@ -220,7 +222,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      const res = await axios.get("http://localhost:5000/api/auth/user", {
+      const res = await axios.get(`${API_BASE_URL}/api/auth/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -249,7 +251,7 @@ export const AuthProvider = ({ children }) => {
         setCartItems,
         syncCartToBackend,
         loadCart,
-        updateItemQuantity
+        updateItemQuantity,
       }}
     >
       {children}

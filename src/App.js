@@ -22,6 +22,7 @@ function App() {
           <div className="flex-grow">
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/oauth-callback" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/product" element={<Product />} />
               <Route
@@ -32,7 +33,7 @@ function App() {
                   </PrivateRoute>
                 }
               />
-              <Route path="/" element={<Navigate to="/login" />} />
+              <Route path="/" element={<Navigate to="/home" />} />
             </Routes>
           </div>
           <Footer />

@@ -4,11 +4,26 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
+// Load PayPal SDK dynamically from environment variable
+const loadPayPalSDK = () => {
+  const clientId = process.env.REACT_APP_PAYPAL_CLIENT_ID;
+  if (!clientId) {
+    console.warn("REACT_APP_PAYPAL_CLIENT_ID is not configured in .env file");
+    return;
+  }
+  const script = document.createElement("script");
+  script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
+  script.async = true;
+  document.head.appendChild(script);
+};
+
+loadPayPalSDK();
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function

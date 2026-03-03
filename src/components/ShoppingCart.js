@@ -6,10 +6,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  Minus
+  Minus,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import PaymentGateway from "./PaymentGateway";
 
 const ShoppingCartComponent = ({
   isOpen,
@@ -24,6 +25,7 @@ const ShoppingCartComponent = ({
   const [isLoading, setIsLoading] = useState(true);
   const [allImages, setAllImages] = useState([]);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -49,29 +51,29 @@ const ShoppingCartComponent = ({
     try {
       if (user && user.email) {
         const response = await axios.get(
-          `http://localhost:5000/images/getimages?userEmail=${user.email}`
+          `${process.env.REACT_APP_API_BASE_URL}/images/getimages?userEmail=${user.email}`,
         );
 
         if (response.data && response.data.data) {
           setAllImages(response.data.data);
           const imageMap = {};
           const productNameMap = {};
-          response.data.data.forEach(image => {
+          response.data.data.forEach((image) => {
             const namePart = image.fileName.split("_")[0];
             if (!imageMap[image.entityId]) {
               imageMap[image.entityId] = {};
-              productNameMap[image.entityId] = namePart; 
+              productNameMap[image.entityId] = namePart;
             }
-            if (image.fileName.includes('_front_')) {
+            if (image.fileName.includes("_front_")) {
               imageMap[image.entityId].front = image.fileUrl;
-            } else if (image.fileName.includes('_back_')) {
+            } else if (image.fileName.includes("_back_")) {
               imageMap[image.entityId].back = image.fileUrl;
             }
           });
           setCustomizedImages(imageMap);
-          setCustomizedNames(productNameMap)
+          setCustomizedNames(productNameMap);
           const initialViews = {};
-          cartItems.forEach(item => {
+          cartItems.forEach((item) => {
             initialViews[item.id] = "front";
           });
           setImageView(initialViews);
@@ -91,17 +93,21 @@ const ShoppingCartComponent = ({
 
   const handleRemoveItemWithImages = async (item, index) => {
     const entityId = getEntityIdForItem(item, index);
-    const imagesToDelete = allImages.filter(img => img.entityId === entityId);
+    const imagesToDelete = allImages.filter((img) => img.entityId === entityId);
 
     try {
       for (const img of imagesToDelete) {
-        await axios.post("http://localhost:5000/images/delete", {
-          id: img._id
-        }, {
-          headers: {
-            Authorization: `Bearer ${user?.token}`
-          }
-        });
+        await axios.post(
+          `${process.env.REACT_APP_API_BASE_URL}/images/delete`,
+          {
+            id: img._id,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${user?.token}`,
+            },
+          },
+        );
       }
       await fetchCustomizedImages();
     } catch (err) {
@@ -122,9 +128,9 @@ const ShoppingCartComponent = ({
     .toFixed(2);
 
   const toggleItemView = (itemId) => {
-    setImageView(prev => ({
+    setImageView((prev) => ({
       ...prev,
-      [itemId]: prev[itemId] === "back" ? "front" : "back"
+      [itemId]: prev[itemId] === "back" ? "front" : "back",
     }));
   };
 
@@ -138,7 +144,9 @@ const ShoppingCartComponent = ({
     }
 
     if (item.customizedImages) {
-      const matchingImage = allImages.find(img => img.fileUrl === item.customizedImages);
+      const matchingImage = allImages.find(
+        (img) => img.fileUrl === item.customizedImages,
+      );
       if (matchingImage) {
         return matchingImage.entityId;
       }
@@ -152,7 +160,11 @@ const ShoppingCartComponent = ({
   const getImageForItem = (item, index) => {
     const entityId = getEntityIdForItem(item, index);
     const currentView = imageView[item.id] || "front";
-    if (entityId && customizedImages[entityId] && customizedImages[entityId][currentView]) {
+    if (
+      entityId &&
+      customizedImages[entityId] &&
+      customizedImages[entityId][currentView]
+    ) {
       return customizedImages[entityId][currentView];
     }
   };
@@ -162,7 +174,7 @@ const ShoppingCartComponent = ({
   };
 
   const handleDecreaseQuantity = (itemId) => {
-    const item = cartItems.find(item => item.id === itemId);
+    const item = cartItems.find((item) => item.id === itemId);
     if (item && item.quantity > 1) {
       updateItemQuantity(itemId, -1);
     }
@@ -170,11 +182,18 @@ const ShoppingCartComponent = ({
 
   const Toast = () => {
     if (!toast.show) return null;
-    
-    const bgColor = toast.type === "success" ? "bg-green-500" : toast.type === "error" ? "bg-red-500" : "bg-blue-500";
+
+    const bgColor =
+      toast.type === "success"
+        ? "bg-green-500"
+        : toast.type === "error"
+          ? "bg-red-500"
+          : "bg-blue-500";
 
     return (
-      <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-4 py-2 rounded-md shadow-lg flex items-center z-50`}>
+      <div
+        className={`fixed top-4 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-4 py-2 rounded-md shadow-lg flex items-center z-50`}
+      >
         {toast.type === "success" && <Check size={16} className="mr-2" />}
         {toast.type === "error" && <div className="mr-2">⚠️</div>}
         {toast.message}
@@ -184,7 +203,7 @@ const ShoppingCartComponent = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
-      <Toast />      
+      <Toast />
       <div
         className="absolute inset-0 bg-black bg-opacity-50"
         onClick={onClose}
@@ -214,7 +233,8 @@ const ShoppingCartComponent = ({
                   const hasCustomizations = item.customizations?.length > 0;
                   const entityId = getEntityIdForItem(item, index);
                   const currentView = imageView[item.id] || "front";
-                  const hasMultipleViews = entityId &&
+                  const hasMultipleViews =
+                    entityId &&
                     customizedImages[entityId] &&
                     customizedImages[entityId].front &&
                     customizedImages[entityId].back;
@@ -232,9 +252,13 @@ const ShoppingCartComponent = ({
                       )}
 
                       <div className="flex items-center justify-between mb-2">
-                        <div className="font-medium">{customizedNames[entityId] || product?.name}</div>
+                        <div className="font-medium">
+                          {customizedNames[entityId] || product?.name}
+                        </div>
                         <button
-                          onClick={() => handleRemoveItemWithImages(item, index)}
+                          onClick={() =>
+                            handleRemoveItemWithImages(item, index)
+                          }
                           className="text-gray-500 hover:text-red-500 transition-colors"
                           aria-label="Remove item"
                         >
@@ -279,13 +303,15 @@ const ShoppingCartComponent = ({
                             <div className="flex items-center border rounded">
                               <button
                                 onClick={() => handleDecreaseQuantity(item.id)}
-                                className={`px-2 py-1 text-gray-500 hover:bg-gray-100 ${itemQuantity <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`px-2 py-1 text-gray-500 hover:bg-gray-100 ${itemQuantity <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
                                 disabled={itemQuantity <= 1}
                                 aria-label="Decrease quantity"
                               >
                                 <Minus size={14} />
                               </button>
-                              <span className="px-2 py-1 min-w-[24px] text-center">{itemQuantity}</span>
+                              <span className="px-2 py-1 min-w-[24px] text-center">
+                                {itemQuantity}
+                              </span>
                               <button
                                 onClick={() => handleIncreaseQuantity(item.id)}
                                 className="px-2 py-1 text-gray-500 hover:bg-gray-100"
@@ -294,30 +320,36 @@ const ShoppingCartComponent = ({
                                 <Plus size={14} />
                               </button>
                             </div>
-                          </div>                          
+                          </div>
                           <div className="text-sm text-gray-500">
-                            {Object.entries(item.color ? { Color: item.color } : {})
-                              .map(([key, value]) => (
-                                <div key={key} className="flex items-center gap-1">
-                                  <span className="font-medium">{key}:</span>
-                                  {key.toLowerCase() === "color" ? (
-                                    <span className="flex items-center">
-                                      <span
-                                        className="inline-block w-3 h-3 rounded-full mr-1 border border-gray-300"
-                                        style={{ backgroundColor: value }}
-                                      />
-                                      {value}
-                                    </span>
-                                  ) : (
-                                    <span>{value}</span>
-                                  )}
-                                </div>
-                              ))}
+                            {Object.entries(
+                              item.color ? { Color: item.color } : {},
+                            ).map(([key, value]) => (
+                              <div
+                                key={key}
+                                className="flex items-center gap-1"
+                              >
+                                <span className="font-medium">{key}:</span>
+                                {key.toLowerCase() === "color" ? (
+                                  <span className="flex items-center">
+                                    <span
+                                      className="inline-block w-3 h-3 rounded-full mr-1 border border-gray-300"
+                                      style={{ backgroundColor: value }}
+                                    />
+                                    {value}
+                                  </span>
+                                ) : (
+                                  <span>{value}</span>
+                                )}
+                              </div>
+                            ))}
                           </div>
                           {hasCustomizations && (
                             <div
                               className="text-xs text-blue-600 mt-1 font-medium cursor-pointer"
-                              onClick={() => hasMultipleViews && toggleItemView(item.id)}
+                              onClick={() =>
+                                hasMultipleViews && toggleItemView(item.id)
+                              }
                             >
                               Customized • view
                             </div>
@@ -336,9 +368,9 @@ const ShoppingCartComponent = ({
                 </div>
                 <button
                   className="w-full py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
-                  onClick={() => alert("Checkout functionality to be implemented")}
+                  onClick={() => setIsPaymentOpen(true)}
                 >
-                  Checkout
+                  Proceed to Checkout
                 </button>
                 <button
                   className="w-full py-2 mt-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors text-sm font-medium"
@@ -351,8 +383,12 @@ const ShoppingCartComponent = ({
           ) : (
             <div className="flex flex-col items-center justify-center text-center text-gray-500 py-12">
               <CartIcon size={48} className="text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium text-gray-700 mb-1">Your cart is empty</h3>
-              <p className="text-sm text-gray-500 mb-6">Add some items to get started</p>
+              <h3 className="text-lg font-medium text-gray-700 mb-1">
+                Your cart is empty
+              </h3>
+              <p className="text-sm text-gray-500 mb-6">
+                Add some items to get started
+              </p>
               <button
                 onClick={onClose}
                 className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -363,6 +399,14 @@ const ShoppingCartComponent = ({
           )}
         </div>
       </div>
+
+      <PaymentGateway
+        isOpen={isPaymentOpen}
+        onClose={() => setIsPaymentOpen(false)}
+        cartItems={cartItems}
+        totalAmount={parseFloat(totalPrice)}
+        products={products}
+      />
     </div>
   );
 };

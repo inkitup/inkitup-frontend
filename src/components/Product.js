@@ -22,10 +22,17 @@ const Toast = ({ message, type, onClose }) => {
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const bgColor = type === "success" ? "bg-green-500" : type === "error" ? "bg-red-500" : "bg-blue-500";
+  const bgColor =
+    type === "success"
+      ? "bg-green-500"
+      : type === "error"
+        ? "bg-red-500"
+        : "bg-blue-500";
 
   return (
-    <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-4 py-2 rounded-md shadow-lg flex items-center z-50`}>
+    <div
+      className={`fixed top-4 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-4 py-2 rounded-md shadow-lg flex items-center z-50`}
+    >
       {type === "success" && <div className="mr-2">✓</div>}
       {type === "error" && <div className="mr-2">⚠️</div>}
       {message}
@@ -44,10 +51,14 @@ export const Product = () => {
   const [savedDesignId, setSavedDesignId] = useState(null);
   const [isAddToCartEnabled, setIsAddToCartEnabled] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [svgPath, setSvgPath] = useState('');
-  const [svgViewBox, setSvgViewBox] = useState('0 0 1920 1280');
+  const [svgPath, setSvgPath] = useState("");
+  const [svgViewBox, setSvgViewBox] = useState("0 0 1920 1280");
   const containerRef = useRef(null);
-  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
 
   const productAreaRef = useRef(null);
@@ -62,7 +73,7 @@ export const Product = () => {
       frontImage: "FullSleevesFront.png",
       backImage: "FullSleevesBack.png",
       frontSvg: "Fullsleeve T-shirt Front.svg",
-      backSvg: "Fullsleeve T-shirt Back.svg"
+      backSvg: "Fullsleeve T-shirt Back.svg",
     },
     {
       id: "halfsleevesTshirt",
@@ -71,7 +82,7 @@ export const Product = () => {
       frontImage: "HalfSleevesFront.png",
       backImage: "HalfSleevesBack.png",
       frontSvg: "halfsleevesfront.svg",
-      backSvg: "halfsleevesback.svg"
+      backSvg: "halfsleevesback.svg",
     },
     {
       id: "hoodieTshirt",
@@ -80,34 +91,34 @@ export const Product = () => {
       frontImage: "HoodieFront.png",
       backImage: "HoodieBack.png",
       frontSvg: "hoodiefront.svg",
-      backSvg: "hoodieback.svg"
+      backSvg: "hoodieback.svg",
     },
-     {
+    {
       id: "zipperTshirt",
       name: "Zipper T-Shirt",
       price: 29.99,
       frontImage: "ZipperTShirtFront.png",
       backImage: "ZipperTShirtBack.png",
       frontSvg: "ZipperTShirtFront.svg",
-      backSvg: "ZipperTShirtBack.svg"
+      backSvg: "ZipperTShirtBack.svg",
     },
-     {
+    {
       id: "oversizedTshirt",
       name: "Oversized T-Shirt",
       price: 29.99,
       frontImage: "OversizedTshirtFront.png",
       backImage: "OversizedTshirtBack.png",
       frontSvg: "OversizedTShirtFront.svg",
-      backSvg: "OversizedTShirtBack.svg"
+      backSvg: "OversizedTShirtBack.svg",
     },
-     {
+    {
       id: "downshoulderTshirt",
       name: "Down Shoulder T-Shirt",
       price: 19.99,
       frontImage: "DownShoulderFront.png",
       backImage: "DownShoulderBack.png",
       frontSvg: "DownShoulderFront.svg",
-      backSvg: "DownShoulderBack.svg"
+      backSvg: "DownShoulderBack.svg",
     },
   ];
 
@@ -151,12 +162,12 @@ export const Product = () => {
       if (image.complete) {
         handleImageLoaded();
       } else {
-        image.addEventListener('load', handleImageLoaded);
+        image.addEventListener("load", handleImageLoaded);
       }
     }
     return () => {
       if (image) {
-        image.removeEventListener('load', handleImageLoaded);
+        image.removeEventListener("load", handleImageLoaded);
       }
     };
   }, [viewSide, selectedProduct]);
@@ -167,21 +178,24 @@ export const Product = () => {
         const currentProduct = products.find((p) => p.id === selectedProduct);
         if (!currentProduct) return;
 
-        const svgFile = viewSide === "front" ? currentProduct.frontSvg : currentProduct.backSvg;
+        const svgFile =
+          viewSide === "front"
+            ? currentProduct.frontSvg
+            : currentProduct.backSvg;
         if (!svgFile) return;
 
         const res = await fetch(`/products/${selectedProduct}/${svgFile}`);
         const svgText = await res.text();
         const parser = new DOMParser();
         const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
-        const svgElement = svgDoc.querySelector('svg');
-        const path = svgDoc.querySelector('path');
+        const svgElement = svgDoc.querySelector("svg");
+        const path = svgDoc.querySelector("path");
 
         if (path) {
-          setSvgPath(path.getAttribute('d'));
+          setSvgPath(path.getAttribute("d"));
         }
-        if (svgElement && svgElement.getAttribute('viewBox')) {
-          setSvgViewBox(svgElement.getAttribute('viewBox'));
+        if (svgElement && svgElement.getAttribute("viewBox")) {
+          setSvgViewBox(svgElement.getAttribute("viewBox"));
         }
       } catch (error) {
         console.error("Failed to load SVG path:", error);
@@ -211,11 +225,11 @@ export const Product = () => {
         setViewSide(side);
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       const productRect = productAreaRef.current.getBoundingClientRect();
       canvas.width = productRect.width * 2;
       canvas.height = productRect.height * 2;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
 
       const baseImg = new Image();
       baseImg.crossOrigin = "Anonymous";
@@ -229,7 +243,7 @@ export const Product = () => {
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="${svgViewBox}">
             <path d="${svgPath}" fill="${selectedColor}" />
           </svg>`;
-        const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+        const svgBlob = new Blob([svgString], { type: "image/svg+xml" });
         const svgUrl = URL.createObjectURL(svgBlob);
 
         const svgImg = new Image();
@@ -237,15 +251,17 @@ export const Product = () => {
           svgImg.onload = resolve;
           svgImg.src = svgUrl;
         });
-        ctx.globalCompositeOperation = 'multiply';
+        ctx.globalCompositeOperation = "multiply";
         ctx.drawImage(svgImg, 0, 0, canvas.width, canvas.height);
-        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalCompositeOperation = "source-over";
         URL.revokeObjectURL(svgUrl);
       }
 
-      const customizationsToDraw = customizations.filter(item => item.side === side);
+      const customizationsToDraw = customizations.filter(
+        (item) => item.side === side,
+      );
       for (const item of customizationsToDraw) {
-        if (item.type === 'sticker') {
+        if (item.type === "sticker") {
           const img = new Image();
           img.crossOrigin = "Anonymous";
           await new Promise((resolve) => {
@@ -259,20 +275,20 @@ export const Product = () => {
 
           ctx.save();
           ctx.translate(x, y);
-          ctx.rotate((item.rotation || 0) * Math.PI / 180);
+          ctx.rotate(((item.rotation || 0) * Math.PI) / 180);
           ctx.drawImage(img, -width / 2, -height / 2, width, height);
           ctx.restore();
-        } else if (item.type === 'text') {
+        } else if (item.type === "text") {
           const x = (item.position.x / 100) * canvas.width;
           const y = (item.position.y / 100) * canvas.height;
 
           ctx.save();
           ctx.translate(x, y);
-          ctx.rotate((item.rotation || 0) * Math.PI / 180);
+          ctx.rotate(((item.rotation || 0) * Math.PI) / 180);
           ctx.font = `${item.fontSize}px "${item.fontFamily}"`;
           ctx.fillStyle = item.color;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
           ctx.fillText(item.content, 0, 0);
           ctx.restore();
         }
@@ -296,7 +312,7 @@ export const Product = () => {
         `${selectedProduct}_${side}_customized.png`,
         {
           type: "image/png",
-        }
+        },
       );
 
       const formData = new FormData();
@@ -305,14 +321,14 @@ export const Product = () => {
       formData.append("entityId", designId || Date.now().toString());
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/images/upload",
+        `${process.env.REACT_APP_API_BASE_URL}/images/upload`,
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       return {
         imageId: response.data.data.id,
@@ -328,7 +344,7 @@ export const Product = () => {
     productId,
     color,
     customizationData,
-    renderedImages
+    renderedImages,
   ) => {
     if (customizationData.length === 0) {
       return savedDesignId || Date.now().toString();
@@ -345,8 +361,8 @@ export const Product = () => {
         payload.id = savedDesignId;
       }
       const response = await axios.post(
-        "http://localhost:5000/customizations/save",
-        payload
+        `${process.env.REACT_APP_API_BASE_URL}/customizations/save`,
+        payload,
       );
       return response.data.data.id || null;
     } catch (error) {
@@ -369,12 +385,12 @@ export const Product = () => {
       const frontUpload = await uploadImageToServer(
         frontImageData.imageBlob,
         designId,
-        "front"
+        "front",
       );
       const backUpload = await uploadImageToServer(
         backImageData.imageBlob,
         designId,
-        "back"
+        "back",
       );
       if (!frontUpload || !backUpload) {
         throw new Error("Failed to upload images");
@@ -387,7 +403,7 @@ export const Product = () => {
         selectedProduct,
         selectedColor,
         customizations,
-        renderedImages
+        renderedImages,
       );
       if (customizationId) {
         setSavedDesignId(customizationId);
@@ -427,17 +443,18 @@ export const Product = () => {
           return;
         }
       }
-      const existingItemIndex = cartItems.findIndex(item =>
-        item.product === selectedProduct &&
-        item.color === selectedColor &&
-        item.designId === savedDesignId
+      const existingItemIndex = cartItems.findIndex(
+        (item) =>
+          item.product === selectedProduct &&
+          item.color === selectedColor &&
+          item.designId === savedDesignId,
       );
       if (existingItemIndex !== -1) {
         const updatedCart = cartItems.map((item, index) => {
           if (index === existingItemIndex) {
             return {
               ...item,
-              quantity: (item.quantity || 1) + 1
+              quantity: (item.quantity || 1) + 1,
             };
           }
           return item;
@@ -454,7 +471,7 @@ export const Product = () => {
           designId: savedDesignId,
           userId: user?._id || null,
           quantity: 1,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         };
         const updatedCart = [...cartItems, newItem];
         setCartItems(updatedCart);
@@ -490,11 +507,11 @@ export const Product = () => {
       const productRect = productAreaRef.current.getBoundingClientRect();
       let newX = Math.max(
         0,
-        Math.min(100, startPosX + (dx / productRect.width) * 100)
+        Math.min(100, startPosX + (dx / productRect.width) * 100),
       );
       let newY = Math.max(
         0,
-        Math.min(100, startPosY + (dy / productRect.height) * 100)
+        Math.min(100, startPosY + (dy / productRect.height) * 100),
       );
       updateCustomizationPosition(id, newX, newY);
     };
@@ -511,8 +528,8 @@ export const Product = () => {
   const updateCustomizationPosition = (id, newX, newY) => {
     setCustomizations(
       customizations.map((item) =>
-        item.id === id ? { ...item, position: { x: newX, y: newY } } : item
-      )
+        item.id === id ? { ...item, position: { x: newX, y: newY } } : item,
+      ),
     );
   };
 
@@ -525,8 +542,10 @@ export const Product = () => {
   const rotateCustomization = (id) => {
     setCustomizations(
       customizations.map((item) =>
-        item.id === id ? { ...item, rotation: (item.rotation || 0) + 15 } : item
-      )
+        item.id === id
+          ? { ...item, rotation: (item.rotation || 0) + 15 }
+          : item,
+      ),
     );
   };
   const resizeCustomization = (id, change) => {
@@ -535,22 +554,22 @@ export const Product = () => {
         if (item.id === id && item.type === "sticker") {
           const newWidth = Math.max(
             20,
-            Math.min(200, (item.size?.width || 100) + change)
+            Math.min(200, (item.size?.width || 100) + change),
           );
           const newHeight = Math.max(
             20,
-            Math.min(200, (item.size?.height || 100) + change)
+            Math.min(200, (item.size?.height || 100) + change),
           );
           return { ...item, size: { width: newWidth, height: newHeight } };
         } else if (item.id === id && item.type === "text") {
           const newSize = Math.max(
             12,
-            Math.min(72, (item.fontSize || 24) + change / 2)
+            Math.min(72, (item.fontSize || 24) + change / 2),
           );
           return { ...item, fontSize: newSize };
         }
         return item;
-      })
+      }),
     );
   };
 
@@ -568,25 +587,29 @@ export const Product = () => {
   const handleUpdateText = (updatedText) => {
     setCustomizations(
       customizations.map((item) =>
-        item.id === activeCustomization
-          ? { ...item, ...updatedText }
-          : item
-      )
+        item.id === activeCustomization ? { ...item, ...updatedText } : item,
+      ),
     );
   };
 
   const currentProduct = products.find((p) => p.id === selectedProduct);
   const imagePath = `/products/${selectedProduct}/${viewSide === "front" ? currentProduct.frontImage : currentProduct.backImage}`;
-  const visibleCustomizations = customizations.filter((item) => item.side === viewSide);
+  const visibleCustomizations = customizations.filter(
+    (item) => item.side === viewSide,
+  );
 
   useEffect(() => {
-    const fontFamilies = [...new Set(customizations
-      .filter(item => item.type === 'text' && item.fontFamily)
-      .map(item => item.fontFamily))];
-        fontFamilies.forEach(fontFamily => {
-      const link = document.createElement('link');
-      link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, '+')}&display=swap`;
-      link.rel = 'stylesheet';
+    const fontFamilies = [
+      ...new Set(
+        customizations
+          .filter((item) => item.type === "text" && item.fontFamily)
+          .map((item) => item.fontFamily),
+      ),
+    ];
+    fontFamilies.forEach((fontFamily) => {
+      const link = document.createElement("link");
+      link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, "+")}&display=swap`;
+      link.rel = "stylesheet";
       document.head.appendChild(link);
     });
   }, [customizations]);
@@ -602,11 +625,7 @@ export const Product = () => {
         products={products}
       />
       {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={hideToast}
-        />
+        <Toast message={toast.message} type={toast.type} onClose={hideToast} />
       )}
       <div className="max-w-6xl mx-auto p-2 bg-gray-100">
         <div className="flex gap-4 mb-4 items-center">
@@ -614,10 +633,11 @@ export const Product = () => {
             {products.map((product) => (
               <button
                 key={product.id}
-                className={`px-4 py-2 rounded-md transition-colors w-full ${selectedProduct === product.id
+                className={`px-4 py-2 rounded-md transition-colors w-full ${
+                  selectedProduct === product.id
                     ? "bg-blue-600 text-white"
                     : "bg-gray-200 hover:bg-gray-300"
-                  }`}
+                }`}
                 onClick={() => {
                   setSelectedProduct(product.id);
                   setViewSide("front");
@@ -645,10 +665,11 @@ export const Product = () => {
           {colors.map((color) => (
             <button
               key={color.value}
-              className={`w-8 h-8 rounded-full border-2 ${selectedColor === color.value
-                ? "border-blue-500 ring-2 ring-blue-300"
-                : "border-gray-300"
-                }`}
+              className={`w-8 h-8 rounded-full border-2 ${
+                selectedColor === color.value
+                  ? "border-blue-500 ring-2 ring-blue-300"
+                  : "border-gray-300"
+              }`}
               style={{ backgroundColor: color.value }}
               onClick={() => setSelectedColor(color.value)}
             />
@@ -657,19 +678,21 @@ export const Product = () => {
         <div className="grid grid-cols-2 sm:grid-cols-8 gap-4 mb-4">
           <button
             onClick={() => setViewSide("front")}
-            className={`px-4 py-2 rounded-md ${viewSide === "front"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 hover:bg-gray-300"
-              }`}
+            className={`px-4 py-2 rounded-md ${
+              viewSide === "front"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
           >
             Front
           </button>
           <button
             onClick={() => setViewSide("back")}
-            className={`px-4 py-2 rounded-md ${viewSide === "back"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 hover:bg-gray-300"
-              }`}
+            className={`px-4 py-2 rounded-md ${
+              viewSide === "back"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
           >
             Back
           </button>
@@ -689,7 +712,7 @@ export const Product = () => {
                   onLoad={(e) => {
                     setImageSize({
                       width: e.target.naturalWidth,
-                      height: e.target.naturalHeight
+                      height: e.target.naturalHeight,
                     });
                   }}
                 />
@@ -700,28 +723,26 @@ export const Product = () => {
                     viewBox={svgViewBox}
                     preserveAspectRatio="xMidYMid meet"
                     style={{
-                      mixBlendMode: 'multiply',
-                      pointerEvents: 'none'
+                      mixBlendMode: "multiply",
+                      pointerEvents: "none",
                     }}
                   >
-                    <path
-                      d={svgPath}
-                      fill={selectedColor}
-                    />
+                    <path d={svgPath} fill={selectedColor} />
                   </svg>
                 )}
                 {visibleCustomizations.map((item) => (
                   <div
                     key={item.id}
-                    className={`absolute cursor-move ${activeCustomization === item.id
-                      ? "ring-2 ring-blue-500"
-                      : ""
-                      }`}
+                    className={`absolute cursor-move ${
+                      activeCustomization === item.id
+                        ? "ring-2 ring-blue-500"
+                        : ""
+                    }`}
                     style={{
                       left: `${item.position.x}%`,
                       top: `${item.position.y}%`,
                       transform: `translate(-50%, -50%) rotate(${item.rotation || 0}deg)`,
-                      zIndex: 10
+                      zIndex: 10,
                     }}
                     onMouseDown={(e) => startDragging(e, item.id)}
                   >
@@ -754,7 +775,9 @@ export const Product = () => {
               <div className="mt-2 p-2 bg-gray-100 rounded-md flex items-center justify-between">
                 <div className="flex gap-2">
                   <button
-                    onClick={() => resizeCustomization(activeCustomization, -10)}
+                    onClick={() =>
+                      resizeCustomization(activeCustomization, -10)
+                    }
                     className="p-1 rounded-full bg-white shadow hover:bg-gray-200"
                     title="Decrease size"
                   >
@@ -785,46 +808,48 @@ export const Product = () => {
               </div>
             )}
             <div className="mt-4">
-            <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold">{currentProduct.name}</h2>
                 <p className="text-gray-600">
                   ${currentProduct.price.toFixed(2)}
                 </p>
               </div>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 mt-3 w-full">
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 mt-3 w-full">
               <button
-                  onClick={saveDesign}
-                  className={`px-4 py-2 rounded-md flex items-center gap-1 ${saving
+                onClick={saveDesign}
+                className={`px-4 py-2 rounded-md flex items-center gap-1 ${
+                  saving
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-green-600 hover:bg-green-700 text-white"
-                    }`}
-                  disabled={saving}
-                >
-                  {saving ? (
-                    <>
-                      <Loader size={16} className="animate-spin" />
-                      <span>Saving...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save size={16} />
-                      {hasUnsavedChanges ? "Save Design" : "Design Saved"}
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={addToCart}
-                  className={`px-4 py-2 rounded-md flex items-center gap-1 ${isAddToCartEnabled
+                }`}
+                disabled={saving}
+              >
+                {saving ? (
+                  <>
+                    <Loader size={16} className="animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    {hasUnsavedChanges ? "Save Design" : "Design Saved"}
+                  </>
+                )}
+              </button>
+              <button
+                onClick={addToCart}
+                className={`px-4 py-2 rounded-md flex items-center gap-1 ${
+                  isAddToCartEnabled
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "bg-gray-400 text-white cursor-not-allowed"
-                    }`}
-                  disabled={!isAddToCartEnabled}
-                >
-                  <ShoppingCart size={16} />
-                  Add to Cart
-                </button>
-              </div>
+                }`}
+                disabled={!isAddToCartEnabled}
+              >
+                <ShoppingCart size={16} />
+                Add to Cart
+              </button>
+            </div>
             {hasUnsavedChanges && (
               <div className="mt-2 text-red-500 text-sm">
                 Please save your design before adding to cart
